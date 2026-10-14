@@ -5,8 +5,13 @@ import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 import DeviceConnectScreen from "../screens/DeviceConnectScreen";
 import { useDeviceConnection } from "../context/DeviceConnectionContext";
+import withSwipeNavigation from "./withSwipeNavigation";
 
 const Tab = createBottomTabNavigator();
+
+// Same screens, just wrapped so a left/right swipe moves to the other tab.
+const SwipeableHomeScreen = withSwipeNavigation(HomeScreen, "Home");
+const SwipeableDeviceConnectScreen = withSwipeNavigation(DeviceConnectScreen, "DeviceConnection");
 
 // Tabs live inside the Drawer, so opening the drawer means reaching up to
 // the parent (Drawer) navigator rather than calling openDrawer() directly.
@@ -66,16 +71,16 @@ export default function TabNavigator() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={SwipeableHomeScreen}
         options={{
-          title: "Gold Rates",
+          title: "A2Gold",
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
         }}
       />
       <Tab.Screen
         name="DeviceConnection"
-        component={DeviceConnectScreen}
+        component={SwipeableDeviceConnectScreen}
         options={{
           title: "Device Connection",
           tabBarLabel: "Device",

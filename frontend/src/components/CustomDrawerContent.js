@@ -1,19 +1,32 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Linking,   Platform, Alert } from "react-native";
 import {
   DrawerContentScrollView,
   DrawerItemList,
+  DrawerItem,
 } from "@react-navigation/drawer";
+import { Ionicons } from "@expo/vector-icons";
+import { useLevelEdit } from "../context/LevelEditContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// ---- Edit these to match your real details ----
-const APP_NAME = "Gold Rate App";
-const SUPPORT_EMAIL = "yourapp@example.com";
-const SUPPORT_PHONE = "+911234567890";
-const COMPANY_NAME = "Your Company";
-const COMPANY_WEBSITE = "https://example.com";
-const APP_VERSION = "1.0.0";
-// -------------------------------------------------
+import {
+  APP_NAME,
+  APP_VERSION,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE,
+  COMPANY_NAME,
+  COMPANY_WEBSITE,
+  ANDROID_PACKAGE_NAME,
+} from "../constants/appInfo";
+
+// // ---- Edit these to match your real details ----
+// const APP_NAME = "Gold Rate App";
+// const SUPPORT_EMAIL = "yourapp@example.com";
+// const SUPPORT_PHONE = "+911234567890";
+// const COMPANY_NAME = "Your Company";
+// const COMPANY_WEBSITE = "https://example.com";
+// const APP_VERSION = "1.0.0";
+// // -------------------------------------------------
 
 function DrawerTextRow({ label, onPress }) {
   return (
@@ -25,6 +38,21 @@ function DrawerTextRow({ label, onPress }) {
 
 export default function CustomDrawerContent(props) {
   const insets = useSafeAreaInsets();
+  const { setLevelEditMode } = useLevelEdit();
+
+  // "Set Level": turns on reorder mode on the Home screen (Save / Reset
+  // buttons, long-press + drag rows). If the user is on another screen
+  // (Settings, Device tab) bring the Home tab forward first.
+  const handleSetLevel = () => {
+    const current = props.state?.routes?.[props.state.index];
+    const onHomeTab =
+      current?.name === "HomeTabs" && (current.state?.index ?? 0) === 0;
+    if (!onHomeTab) {
+      props.navigation.navigate("HomeTabs", { screen: "Home" });
+    }
+    setLevelEditMode(true);
+    props.navigation.closeDrawer();
+  };
 
   const handleEmail = () => {
     Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Support`);
@@ -41,6 +69,48 @@ export default function CustomDrawerContent(props) {
   const handlePlaceholder = (label) => {
     // TODO: hook these up to real screens/links as you build them out.
   };
+    const handleAboutThisApp = () => {
+    // "About" is registered on the root Stack (App.js), not on this
+    // Drawer navigator, so this call bubbles up to the parent Stack,
+    // which pushes it as a normal screen with a back button.
+    props.navigation.navigate("About");
+  };
+
+    const handleTermsAndPrivacy = () => {
+    props.navigation.navigate("Terms");
+  };
+
+    const handleRateApp = async () => {
+    if (Platform.OS === "android") {
+      const marketUrl = `market://details?id=${ANDROID_PACKAGE_NAME}`;
+      const webUrl = `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE_NAME}`;
+      try {
+        // market:// opens the Play Store app directly; falls back to the
+        // browser if the Play Store app isn't available (e.g. some emulators).
+        const canOpenMarket = await Linking.canOpenURL(marketUrl);
+        await Linking.openURL(canOpenMarket ? marketUrl : webUrl);
+      } catch {
+        Linking.openURL(webUrl);
+      }
+      return;
+    }
+
+    if (Platform.OS === "ios") {
+      if (!IOS_APP_STORE_ID) {
+        // Not published on the App Store yet — nothing to link to.
+        Alert.alert("Not available yet", "This app isn't on the App Store yet.");
+        return;
+      }
+      const storeUrl = `itms-apps://itunes.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`;
+      const webUrl = `https://apps.apple.com/app/id${IOS_APP_STORE_ID}?action=write-review`;
+      try {
+        const canOpenStore = await Linking.canOpenURL(storeUrl);
+        await Linking.openURL(canOpenStore ? storeUrl : webUrl);
+      } catch {
+        Linking.openURL(webUrl);
+      }
+    }
+  };
 
   return (
     <DrawerContentScrollView
@@ -56,41 +126,47 @@ export default function CustomDrawerContent(props) {
 
       {/* Default drawer items (Home, Settings, etc. from DrawerNavigator) */}
       <DrawerItemList {...props} />
+      <DrawerItem
+        label="Set Level"
+        inactiveTintColor="#CCCCCC"
+        icon={({ color, size }) => (
+          <Ionicons name="reorder-three" color={color} size={size} />
+        )}
+        onPress={handleSetLevel}
+      />
 
       <View style={styles.sectionGap} />
 
       {/* Contact Us */}
       <Text style={styles.sectionTitle}>CONTACT US</Text>
-      <DrawerTextRow label="Send us an email" onPress={handleEmail} />
-      <DrawerTextRow label="Report an issue" onPress={handleReportIssue} />
-      <DrawerTextRow label="Suggest a feature" onPress={handleSuggestFeature} />
+      <DrawerTextRow label="Send Us an Email" onPress={handleEmail} />
+      <DrawerTextRow label="Report an Issue" onPress={handleReportIssue} />
+      <DrawerTextRow label="Suggest a Feature" onPress={handleSuggestFeature} />
 
       {/* About */}
       <View style={styles.sectionGap} />
-      <Text style={styles.sectionTitle}>ABOUT</Text>
+      <Text style={styles.sectionTitle}>A2GOLD</Text>
       <DrawerTextRow
-        label="About this app"
-        onPress={() => handlePlaceholder("About")}
+        label="About This App"
+        onPress={handleAboutThisApp}
       />
       <DrawerTextRow
-        label="Rate the app"
-        onPress={() => handlePlaceholder("Rate the app")}
+        label="Rate The App"
+        onPress={handleRateApp}
       />
-      <DrawerTextRow
+      {/* <DrawerTextRow
         label="Invite friends"
         onPress={() => handlePlaceholder("Invite friends")}
-      />
+      /> */}
       <DrawerTextRow
-        label="Terms of use and Privacy"
-        onPress={() => handlePlaceholder("Terms of use")}
+        label="Terms of Use And Privacy"
+        onPress={handleTermsAndPrivacy}
       />
-      <View style={styles.textRow}>
-        <Text style={styles.versionText}>Current version {APP_VERSION}</Text>
-      </View>
+     
 
       {/* Company links */}
       <View style={styles.sectionGap} />
-      <Text style={styles.sectionTitle}>{COMPANY_NAME.toUpperCase()}</Text>
+      <Text style={styles.sectionTitle}>A2MATION APP</Text>
       <DrawerTextRow
         label="Our Website"
         onPress={() => Linking.openURL(COMPANY_WEBSITE)}

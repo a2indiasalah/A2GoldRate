@@ -12,7 +12,16 @@ function keyFor(gramUnit) {
 
 // Saves a single purity's rate, merging with whatever is already stored
 // for that gram unit (so updating one purity doesn't wipe the others).
-export async function saveRate(purity, ratePerGram, gramUnit) {
+// Saves run one after another: two quick saves (e.g. submit + blur, or
+// editing two fields in a row) must not read the same old data and
+// overwrite each other's value.
+let saveQueue = Promise.resolve();
+export function saveRate(purity, ratePerGram, gramUnit) {
+  saveQueue = saveQueue.then(() => writeRate(purity, ratePerGram, gramUnit));
+  return saveQueue;
+}
+
+async function writeRate(purity, ratePerGram, gramUnit) {
   try {
     const existing = await loadSavedRates(gramUnit);
     const updated = { ...existing, [purity]: ratePerGram };

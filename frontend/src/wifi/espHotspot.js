@@ -31,7 +31,7 @@
 import { Platform, PermissionsAndroid } from 'react-native';
 import WifiManager from 'react-native-wifi-reborn';
 
-export const ESP_HOTSPOT_SSID = 'A2_SALAH';
+export const ESP_HOTSPOT_SSID = 'A2_GOLD';
 export const ESP_HOTSPOT_PASSWORD = 'A2_ma_tion';
 export const ESP_HOTSPOT_IP = '192.168.4.1';
 

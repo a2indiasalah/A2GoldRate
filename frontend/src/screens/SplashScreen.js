@@ -1,18 +1,31 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Image } from "react-native";
+import { hasSeenIntro } from "../storage/Puritystorage";
 
 export default function SplashScreen({ navigation }) {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.replace("Ad");
-    }, 2000);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      // The Intro screen shows a "Get Started" button only on the very
+      // first open; on every later launch it waits 2 seconds and moves on.
+      const seen = await hasSeenIntro();
+      if (cancelled) return;
+      navigation.replace("Intro", { isFirstLaunch: !seen });
+    }, 5000);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>🪙</Text>
-      <Text style={styles.title}>Gold Rate App</Text>
+       <Image
+        source={require("../../assets/icon.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      <Text style={styles.title}>A2Gold</Text>
       <ActivityIndicator size="large" color="#D4AF37" style={{ marginTop: 24 }} />
     </View>
   );
@@ -26,7 +39,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    fontSize: 64,
+    width: 228,
+    height: 228,
   },
   title: {
     color: "#D4AF37",

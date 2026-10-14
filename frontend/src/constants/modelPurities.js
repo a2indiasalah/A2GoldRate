@@ -27,7 +27,7 @@ export const MODEL_PURITY_MAP = {
     "A2GM21":["Date", "Time", "24CT", "22CT", "Silver"],
     "A2GM22": ["Date", "Time", "24CT", "22CT", "20CT", "Silver"],
     "A2GM23": ["Date", "Time", "22CT", "18CT", "Silver"],
-    "A2GM24":  ["Date", "24CT", "22CT", "18CT", "14CT", "Silver"],
+    "A2GM24":  ["Date", "24CT", "22CT", "18CT", "14CT", "Silver", "Purchase Rate"],//pc chandra
     "A2GM25": ["22CT", "Silver"],
     "A2GM26": ["24CT", "22CT", "18CT", "14CT", "Silver"],
     "A2GM27": ["Date","Time", "24CT", "22CT","20CT", "18CT", "Silver"],
@@ -68,4 +68,59 @@ export function getPuritiesForModel(modelNumber) {
     if (!modelNumber) return null;
     const key = modelNumber.trim().toUpperCase();
     return MODEL_PURITY_MAP[key] || null;
+}
+
+// True only for actual karat purities like "24CT", "9CT", etc. Used
+// wherever we decide whether to prefix a purity's label with "Gold" —
+// Date/Time/Silver/Platinum/Making Charge/Purchase Rate and any
+// custom-added purity name should never get that prefix, and this
+// pattern check means a screen doesn't need to keep a hardcoded
+// exclusion list in sync as new non-karat purities get added.
+export function isGoldKarat(purity) {
+    return /^\d+CT$/i.test(String(purity || "").trim());
+}
+
+// Preferred display order for known purity types. Anything not listed
+// here (a brand-new purity you just added) still shows up — it's just
+// appended alphabetically after these, instead of being hidden.
+const PURITY_DISPLAY_ORDER = [
+    "Date",
+    "Time",
+    "24CT",
+    "22CT",
+    "20CT",
+    "18CT",
+    "14CT",
+    "9CT",
+    "Silver",
+    "Platinum",
+    "Making Charge",
+    "Purchase Rate",
+    "Exchange Rate",
+];
+
+// Purities that are offered on the Custom screen but aren't tied to
+// any specific device model (so they'd never appear in
+// MODEL_PURITY_MAP). Add to this list for new "extra" options that
+// don't belong to a model.
+const EXTRA_CUSTOM_PURITIES = ["Platinum", "Making Charge", "Purchase Rate", "Exchange Rate"];
+
+// Every purity the Custom screen should let the user pick, derived
+// automatically from MODEL_PURITY_MAP + EXTRA_CUSTOM_PURITIES. This
+// is the single source of truth for "what purities exist" — add a
+// new purity to any model above (or to EXTRA_CUSTOM_PURITIES) and it
+// will automatically show up here too, with no other file to edit.
+export function getAllPurities() {
+    const all = new Set();
+    Object.values(MODEL_PURITY_MAP).forEach((list) =>
+        list.forEach((p) => all.add(p)),
+    );
+    EXTRA_CUSTOM_PURITIES.forEach((p) => all.add(p));
+
+    const known = PURITY_DISPLAY_ORDER.filter((p) => all.has(p));
+    const unknown = [...all]
+        .filter((p) => !PURITY_DISPLAY_ORDER.includes(p))
+        .sort();
+
+    return [...known, ...unknown];
 }

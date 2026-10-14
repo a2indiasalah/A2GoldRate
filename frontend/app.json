@@ -1,21 +1,21 @@
 {
   "expo": {
-    "name": "Gold Rate App",
-    "slug": "gold-rate-app",
+    "name": "A2Gold",
+    "slug": "A2Gold",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#111111"
-    },
     "assetBundlePatterns": [
       "**/*"
     ],
     "android": {
-      "package": "com.yourcompany.goldrateapp",
+      "package": "com.A2mation.A2Gold",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_WIFI_STATE",
+        "CHANGE_WIFI_STATE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111111"
@@ -25,11 +25,30 @@
       "supportsTablet": true
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
+          }
+        }
+      ],
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#111111"
+        }
+      ]
     ],
     "extra": {
       "eas": {
-        "projectId": "f5cb7bf0-7ac4-45be-961e-66915af0f396"
+        "projectId": "2bf85938-420a-4640-8948-d00b8edde929"
       }
     }
   }

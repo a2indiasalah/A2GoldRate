@@ -4,17 +4,19 @@ import { Ionicons } from "@expo/vector-icons";
 import TabNavigator from "./TabNavigator";
 import welcomeScreen from "../screens/WelcomeScreen";
 import CustomDrawerContent from "../components/CustomDrawerContent";
+import { LevelEditProvider } from "../context/LevelEditContext";
 
 const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigator() {
   return (
+    <LevelEditProvider>
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
         headerStyle: { backgroundColor: "#111111" },
         headerTintColor: "#FFFFFF",
-        drawerStyle: { backgroundColor: "#1C1C1C" },
+        drawerStyle: { backgroundColor: "#1C1C1C",  width: "65%"  },
         drawerActiveTintColor: "#D4AF37",
         drawerInactiveTintColor: "#CCCCCC",
       }}
@@ -41,5 +43,6 @@ export default function DrawerNavigator() {
         }}
       />
     </Drawer.Navigator>
+    </LevelEditProvider>
   );
 }

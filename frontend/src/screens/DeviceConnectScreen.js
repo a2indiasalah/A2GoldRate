@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  SafeAreaView,
+
   Alert,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from "@expo/vector-icons";
 import {
   ESP_HOTSPOT_SSID,
@@ -17,7 +18,7 @@ import {
   disconnectFromEspHotspot,
   pingEspHotspot,
 } from "../wifi/espHotspot";
-import { getLatestRates, sendRatesToDevice } from "../api/goldRateApi";
+import { getLatestRates, sendRatesToDevice, sendDateTimeToDevice } from "../api/goldRateApi";
 import { useDeviceConnection } from "../context/DeviceConnectionContext";
 
 // Placeholder scan — replace with real WiFi/IoT device discovery
@@ -111,11 +112,17 @@ export default function DeviceConnectScreen() {
   };
 
   const handleSyncDevice = async () => {
-    // TODO: implement fetching current data/rates from the device here.
     setSyncing(true);
-    Alert.alert("Sync complete", "The device synced successfully.");
     try {
-      // ...
+      // Sends "$,DDMMYYYY,HHMMSS" (e.g. $,09092026,122230) so the display
+      // sets its clock to the phone's current time.
+      await sendDateTimeToDevice(ESP_HOTSPOT_IP);
+      Alert.alert("Sync complete", "The device synced successfully.");
+    } catch (err) {
+      Alert.alert(
+        "Sync failed",
+        err?.message || "Could not sync the device. Make sure it stays powered on and in range.",
+      );
     } finally {
       setSyncing(false);
     }
@@ -199,7 +206,7 @@ export default function DeviceConnectScreen() {
   const buttonLabel = hotspotConnecting ? "Connecting..." : "Connect to Device";
 
  return (
-  <SafeAreaView style={styles.safeArea}>
+  <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
     <View style={styles.container}>
       <View style={styles.topContent}>
         <Text style={styles.title}>Connect Display Device</Text>
